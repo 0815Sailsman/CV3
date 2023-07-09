@@ -48,12 +48,10 @@ void* send_data_loop(void* arg) {
 	// Verify that pointer matches
 	// printf("%p\n", (void *) client);
 	// Start spamming random data
-	srand(time(NULL));
 	int keyInd;
 	int val;
 	char dataMsg[64];
 	while (true) {
-		printf("sending new...\n");
 		// randomly choose one key
 		keyInd = rand() % 10;
 		// randomly generate value
@@ -66,6 +64,7 @@ void* send_data_loop(void* arg) {
 		unsigned int seconds = 1;
 		sleep(seconds);
 	}
+	free(threadArgs);
 	return NULL;
 }
 
@@ -83,6 +82,9 @@ void onmessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size, i
 		ws_sendframe_txt(client, "init|Color,Count,Distance,Info,Log");
 		// Start spamming random data in own thread
 		struct ThreadArgs* threadArgs = malloc(sizeof(struct ThreadArgs));
+		if (threadArgs == NULL) {
+			fprintf(stderr, "Failed to allocate memory.\n");
+		}
 		threadArgs->client = client;
 		pthread_t thread;
 		// Verify that pointer matches
@@ -96,6 +98,7 @@ void onmessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size, i
 
 
 int main(void) {
+	srand(time(NULL));
 	struct ws_events evs;
 	evs.onopen    = &onopen;
 	evs.onclose   = &onclose;
