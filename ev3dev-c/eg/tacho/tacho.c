@@ -36,6 +36,7 @@ int main( void ) {
 	uint8_t sn;
 	FLAGS_T state;
 	char s[ 256 ];
+	int tempbuf;
 
 #ifndef __ARM_ARCH_4T__
 	/* Disable auto-detection of the brick (you have to set the correct address below) */
@@ -62,10 +63,18 @@ int main( void ) {
 		for ( i = 0; i < DESC_LIMIT; i++ ) {
 			if ( ev3_tacho[ i ].type_inx != TACHO_TYPE__NONE_ ) {
 				printf( "  type = %s\n", ev3_tacho_type( ev3_tacho[ i ].type_inx ));
+				get_tacho_speed(i, &tempbuf);
+				printf( " Speed = %d\n", tempbuf);
+				get_tacho_position(i, &tempbuf);
+				printf( " Position = %d\n", tempbuf);
+				get_tacho_duty_cycle(i, &tempbuf);
+				printf( " Duty Cycle (auslastung) = %d\n", tempbuf);
+				printf( " Polarity / Direction = %s\n", ev3_tacho_polarity(ev3_tacho[ i ].type_inx));
+				printf( " State flags = %zx\n", get_tacho_state_flags(i, s));
 				printf( "  port = %s\n", ev3_tacho_port_name( i, s ));
 			}
 		}
-		sleep(1);
+		Sleep(330);
 	}
 	/*
 	if ( ev3_search_tacho( LEGO_EV3_M_MOTOR, &sn, 0 )) {
