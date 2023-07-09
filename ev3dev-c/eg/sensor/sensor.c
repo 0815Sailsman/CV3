@@ -55,10 +55,11 @@ int main( void ) {
 	if ( ev3_init() < 1 ) return ( 1 );
 
 	printf( "*** ( EV3 ) Hello! ***\n" );
-
+	int scount = 0;
 	while (true) {
 		printf("Rescanning...\n");
-		ev3_sensor_init();
+		scount = ev3_sensor_init();
+		printf("sensor count: %d\n", scount);
 		printf( "Found sensors:\n" );
 		for ( i = 0; i < DESC_LIMIT; i++ ) {
 			if ( ev3_sensor[ i ].type_inx != SENSOR_TYPE__NONE_ ) {
@@ -76,6 +77,7 @@ int main( void ) {
 				}
 			}
 		}
+		/*
 		if ( ev3_search_sensor( LEGO_EV3_IR, &sn_ir, 0 )) {
 			printf( "IR sensor is found\n" );
 		} else {
@@ -107,6 +109,7 @@ int main( void ) {
 			printf( "COLOR sensor is NOT found\n" );
 			//while ( !_check_pressed( sn_touch )) Sleep( 100 );
 		}
+		*/
 		sleep(1);
 	}
 	ev3_uninit();
