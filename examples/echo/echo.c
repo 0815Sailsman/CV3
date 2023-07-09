@@ -5,6 +5,7 @@
 #include <ws.h>
 #include <string.h>
 #include <time.h>
+#include <pthread.h>
 
 const char possible[10][20] = {
 	"Color",
@@ -17,6 +18,10 @@ const char possible[10][20] = {
 	"Wifi",
 	"IR",
 	"Hardware"
+};
+
+struct ThreadArgs {
+	ws_cli_conn_t *client;
 };
 
 void onopen(ws_cli_conn_t *client) {
@@ -37,6 +42,33 @@ void onclose(ws_cli_conn_t *client)
 #endif
 }
 
+void* send_data_loop(void* arg) {
+	struct ThreadArgs* threadArgs = (struct ThreadArgs*)arg;
+	ws_cli_conn_t *client = threadArgs->client;
+	// Verify that pointer matches
+	// printf("%p\n", (void *) client);
+	// Start spamming random data
+	srand(time(NULL));
+	int keyInd;
+	int val;
+	char dataMsg[64];
+	while (true) {
+		printf("sending new...\n");
+		// randomly choose one key
+		keyInd = rand() % 10;
+		// randomly generate value
+		val = rand() % 10;
+		// hydrate msg
+		sprintf(dataMsg, "data|%s|%d", possible[keyInd], val);
+		//send to client
+		ws_sendframe_txt(client, dataMsg);
+		// Wait for 1 sec
+		unsigned int seconds = 1;
+		sleep(seconds);
+	}
+	return NULL;
+}
+
 
 void onmessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size, int type) {
 	char *cli;
@@ -49,24 +81,16 @@ void onmessage(ws_cli_conn_t *client, const unsigned char *msg, uint64_t size, i
 	const char *literal = "init";
 	if (strcmp((const char *)msg, literal) == 0) {
 		ws_sendframe_txt(client, "init|Color,Count,Distance,Info,Log");
-		// Start spamming random data
-		srand(time(NULL));
-		int keyInd;
-		int val;
-		char dataMsg[64];
-		while (true) {
-			// randomly choose one key
-			keyInd = rand() % 10;
-			// randomly generate value
-			val = rand() % 10;
-			// hydrate msg
-			sprintf(dataMsg, "data|%s|%d", possible[keyInd], val);
-			//send to client
-			ws_sendframe_txt(client, dataMsg);
-			// Wait for 1 sec
-			unsigned int seconds = 1;
-			sleep(seconds);
+		// Start spamming random data in own thread
+		struct ThreadArgs* threadArgs = malloc(sizeof(struct ThreadArgs));
+		threadArgs->client = client;
+		pthread_t thread;
+		// Verify that pointer matches
+		// printf("CORRECT POINTER: %p\n", (void* ) client);
+		if (pthread_create(&thread, NULL, send_data_loop, (void*)threadArgs) != 0) {
+			fprintf(stderr, "Failed to create thread.\n");
 		}
+		free(threadArgs);
 	}
 }
 
