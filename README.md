@@ -22,10 +22,15 @@ Includes:
 
   List of implemented devices, modes and how they have to be handled:  
    - [Lego Color Sensor](https://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-stretch/sensor_data.html#lego-ev3-color)
-     - [ ] Color
-     - [ ] Raw Color
-     - [ ] Reflection
-     - [ ] Ambient Color
+     - [x] Color
+     - [x] Raw Color
+     - [x] Reflection
+     - [x] Ambient Color
+
+     Example block:  
+
+    in1,lego-ev3-color,[0,0,0,0,0,0]
+
    - [Lego US Sensor](https://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-stretch/sensor_data.html#lego-ev3-us)
      - [ ] Distance CM
    - [Lego Touch Sensor](https://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-stretch/sensor_data.html#lego-ev3-us)
@@ -33,3 +38,10 @@ Includes:
 
   ### TODO
    - [ ] Make it whitespace insensitive
+   - [ ] Move away from strings to improve performance
+
+Port can be expressed through Byte
+Type should be able to be expressed through byte (we dont need to support all possible)
+Every value will be 1 or at most 2 bytes
+         
+This should improved performance by alot since we dont need expensive string operations but only simple nr ops
