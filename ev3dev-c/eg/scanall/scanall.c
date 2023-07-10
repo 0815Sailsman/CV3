@@ -12,6 +12,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include "ev3.h"
 #include "ev3_port.h"
@@ -41,20 +42,60 @@ uint32_t n, i, ii;
 uint8_t sn;
 int scount = 0;
 FLAGS_T state;
-char s[256];
 int tempbuf;
 int mcount = 0;
 
-void scan_sensors() {
+void color_data(char *msg) {
+	set_sensor_mode(i, "COL-COLOR");
+	get_sensor_value(0, i, &val);
+	sprintf(s, "%d,", val);
+	strcat(msg, s);
+
+	set_sensor_mode(i, "RGB-RAW");
+	if ( get_sensor_num_values( i, &n )) {
+		for ( ii = 0; ii < n; ii++ ) {
+			if ( get_sensor_value( ii, i, &val )) {
+				sprintf(s, "%d,", val);
+				strcat(msg, s);
+			}
+		}
+	}
+
+	set_sensor_mode(i, "COL-REFLECT");
+	get_sensor_value(0, i, &val);
+	sprintf(s, "%d,", val);
+	strcat(msg, s);
+
+	set_sensor_mode(i, "COL-AMBIENT");
+	get_sensor_value(0, i, &val);
+	sprintf(s, "%d", val);
+	strcat(msg, s);
+
+}
+
+void device_specific_data(char *msg) {
+	strcat(msg, "[");
+	switch(ev3_sensor[i].type_inx) {
+		case LEGO_EV3_COLOR: color_data(msg); break;
+		default: break;
+	}
+	strcat(msg, "]");
+}
+
+void scan_sensors(char* msg) {
 	printf("Scanning sensors...\n");
 	scount = ev3_sensor_init();
 	printf("sensor count: %d\n", scount);
 	printf( "Found sensors:\n" );
 	for ( i = 0; i < DESC_LIMIT; i++ ) {
 		if ( ev3_sensor[ i ].type_inx != SENSOR_TYPE__NONE_ ) {
-			printf( "  type = %s\n", ev3_sensor_type( ev3_sensor[ i ].type_inx ));
-			printf( "  port = %s\n", ev3_sensor_port_name( i, s ));
-			if ( get_sensor_mode( i, s, sizeof( s ))) {
+			strcat(msg, ev3_sensor_port_name(i, s));
+			strcat(msg, ",");
+			strcat(msg, ev3_sensor_type(ev3_sensor[i].type_inx));
+			strcat(msg, ",");
+			device_specific_data(msg);
+			/*
+			if (get_sensor_mode( i, s, sizeof( s ))) {
 				printf( "  mode = %s\n", s );
 			}
 			if ( get_sensor_num_values( i, &n )) {
@@ -64,12 +105,13 @@ void scan_sensors() {
 					}
 				}
 			}
+			*/
 		}
 	}
 	printf("\n");
 }
 
-void scan_motors() {
+void scan_motors(char* msg) {
 	printf("Scanning motors...\n");
 		mcount = ev3_tacho_init();
 		printf( "Found %d tacho motors:\n", mcount);
@@ -98,9 +140,16 @@ int main( void ) {
 
 	printf( "*** ( EV3 ) Hello! ***\n" );
 	while (true) {
-		scan_sensors();
-		scan_motors();
-		sleep(1);
+		char *msg = (char *)calloc(1024, sizeof(char));
+		if (msg == NULL) {
+			printf("Memory allocation failed.\n");
+			return 1;
+		}
+		scan_sensors(msg);
+		scan_motors(msg);
+		printf("%s\n", msg);
+		free(msg);
+		//sleep(1);
 	}
 	ev3_uninit();
 	printf( "\n*** ( EV3 ) Bye! ***\n" );
