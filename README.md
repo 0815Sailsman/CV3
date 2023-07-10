@@ -21,7 +21,15 @@ Includes:
     The receiving device then sees the device-name and can deduce the meaning of the specific values.  
 
   List of implemented devices, modes and how they have to be handled:  
-  
+   - [Lego Color Sensor](https://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-stretch/sensor_data.html#lego-ev3-color)
+     - [ ] Color
+     - [ ] Raw Color
+     - [ ] Reflection
+     - [ ] Ambient Color
+   - [Lego US Sensor](https://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-stretch/sensor_data.html#lego-ev3-us)
+     - [ ] Distance CM
+   - [Lego Touch Sensor](https://docs.ev3dev.org/projects/lego-linux-drivers/en/ev3dev-stretch/sensor_data.html#lego-ev3-us)
+     - [ ] Pressed
 
   ### TODO
    - [ ] Make it whitespace insensitive
