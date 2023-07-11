@@ -45,3 +45,8 @@ Type should be able to be expressed through byte (we dont need to support all po
 Every value will be 1 or at most 2 bytes
          
 This should improved performance by alot since we dont need expensive string operations but only simple nr ops
+
+After measuring it turns out that:
+ - Yes, switching from strings to chars indeed provides relatively large performance boosts (who wouldve thought :))
+ - The act of switching sensors and reading the values is expensive. For now rebuild this to just read the active sensor data.
+ - This might generally be a un-performant approach.  Try to implement the webserver in RobotC and see what it can deliver.
